@@ -123,17 +123,18 @@ class SimpleExtractor(FeatureExtractor):
         ghosts = [state.getAgentPosition(g) for g in agent.getOpponents(state)]
 
         features = util.Counter()
-
         features["bias"] = 1.0
+
 
         # compute the location of pacman after he takes the action
         x, y = state.getAgentPosition(agent.index)
         dx, dy = Actions.directionToVector(action)
         next_x, next_y = int(x + dx), int(y + dy)
         pos = (next_x, next_y)
-        if len(food.asList()) <= 2:
+        num_carrying = state.getAgentState(agent.index).numCarrying
+        if num_carrying > 0:
             dist = agent.getMazeDistance(agent.start_pos, (next_x, next_y))
-            features["run-home"] = float(dist) / (walls.width * walls.height)
+            features["run-home"] = float(dist) / (walls.width * walls.height) * num_carrying
 
         features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(state.getAgentPosition(g), walls) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer == 0)
 

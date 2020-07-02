@@ -235,6 +235,8 @@ class ApproximateQAgent(PacmanQAgent):
         """
         qValue = 0.0
         features = self.featExtractor.getFeatures(self, state, action)
+        if self.isInTesting():
+            print(features)
         for key in features.keys():
             qValue += (self.weights[key] * features[key])
         return qValue
@@ -307,13 +309,12 @@ class DummyAgent(ApproximateQAgent):
 
   def chooseAction(self, gameState):
     """
-    Picks among actions randomly.
     """
     return PacmanQAgent.getAction(self, gameState)
 
 
 class DefensiveAgent(CaptureAgent):
-    def __init__(self, index):
+    def __init__(self, index, **args):
         CaptureAgent.__init__(self, index)
 
     def getValue(self, state, opponent):
@@ -333,7 +334,6 @@ class DefensiveAgent(CaptureAgent):
                 return 0, action
         if depth == 0:
             val = self.getValue(state, opponent)
-            print(val)
             return val, None
 
         next_player = self.generate_next_player(next_player, opponent)
