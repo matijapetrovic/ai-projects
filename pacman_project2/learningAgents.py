@@ -118,8 +118,8 @@ class ReinforcementAgent(ValueEstimationAgent):
           state. This is what you should use to
           obtain legal actions for a state
         """
-        legalActions = self.actionFn(state, index)
-        return list(filter(lambda action: action != Directions.STOP, legalActions))
+        return self.actionFn(state, index)
+
 
     def observeTransition(self, state,action,nextState,deltaReward):
         """
@@ -230,7 +230,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         pos = state.getAgentPosition(self.index)
         last_pos = self.lastState.getAgentPosition(self.index)
         if self.getMazeDistance(pos, last_pos) > 1:
-            return -50
+            return -5
         return 0
 
     def registerInitialState(self, state):

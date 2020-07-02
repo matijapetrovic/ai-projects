@@ -153,11 +153,8 @@ class SimpleExtractor(FeatureExtractor):
         # if there is no danger of ghosts then add the food feature
         if not features["#-of-ghosts-1-step-away"] and food[next_x][next_y]:
             features["eats-food"] = 1.0
-
-        dist = max(closestFood((next_x, next_y), food, walls), 0.5)
+        dist = closestFood((next_x, next_y), food, walls)
         if dist is not None:
-            # make the distance a number less than one otherwise the update
-            # will diverge wildly
             features["closest-food"] = float(dist) / (walls.width * walls.height)
         features.divideAll(10.0)
         return features

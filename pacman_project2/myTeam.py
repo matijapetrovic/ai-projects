@@ -248,6 +248,8 @@ class ApproximateQAgent(PacmanQAgent):
         features = self.featExtractor.getFeatures(self, state, action)
         diff = self.alpha * ((reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action))
         for feature in features.keys():
+            #if feature == "closest-food":
+            #    print(features[feature], diff)
             self.weights[feature] = self.weights[feature] + diff * features[feature]
 
     def final(self, state):
@@ -307,10 +309,13 @@ class DummyAgent(ApproximateQAgent):
     '''
 
 
-  def chooseAction(self, gameState):
+  def getAction(self, gameState):
     """
     """
-    return PacmanQAgent.getAction(self, gameState)
+    action = PacmanQAgent.getAction(self, gameState)
+    if action == "Stop":
+        print(action)
+    return action
 
 
 class DefensiveAgent(CaptureAgent):
