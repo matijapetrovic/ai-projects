@@ -13,6 +13,7 @@
 
 
 "Feature extractors for Pacman game states"
+import math
 
 from game import Directions, Actions
 import util
@@ -74,6 +75,34 @@ def get_ghosts_3_away(agent, state, pos, ghosts):
         ghost_pos = state.getAgentPosition(g)
         dist = agent.getMazeDistance(pos, ghost_pos)
         if dist <= 5:
+            sum += 1
+    return sum
+
+def get_min_opponents_distance(agent, state, pos, ghosts):
+    min_distance = 10000
+    for g in ghosts:
+        ghost_pos = state.getAgentPosition(g)
+        ghost_state = state.getAgentState(g)
+        dist = agent.getMazeDistance(pos, ghost_pos)
+        if dist <= min_distance:  # zasto ne radi ako ovde stavim isPacman ?
+            min_distance = dist
+    return min_distance
+
+def check_opponents( state, ghosts):
+    sum = 0
+    for g in ghosts:
+        ghost_state = state.getAgentState(g)
+        if ghost_state.isPacman:
+            sum += 1
+    return sum
+
+def get_pacmans_1_step_away(agent, state, pos, ghosts):
+    sum = 0
+    for g in ghosts:
+        ghost_pos = state.getAgentPosition(g)
+        ghost_state = state.getAgentState(g)
+        dist = agent.getMazeDistance(pos, ghost_pos)
+        if dist <= 5 and ghost_state.isPacman:
             sum += 1
     return sum
 
