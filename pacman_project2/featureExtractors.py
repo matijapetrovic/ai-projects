@@ -91,7 +91,7 @@ class SimpleExtractor(FeatureExtractor):
         # extract the grid of food and wall locations and get the ghost locations
         food = agent.getFood(state)
         walls = state.getWalls()
-        ghosts = agent.getOpponents(state)
+        ghosts = [state.getAgentPosition(g) for g in agent.getOpponents(state)]
 
         features = util.Counter()
 
@@ -101,19 +101,30 @@ class SimpleExtractor(FeatureExtractor):
         x, y = state.getAgentPosition(agent.index)
         dx, dy = Actions.directionToVector(action)
         next_x, next_y = int(x + dx), int(y + dy)
-
+        pos = (next_x, next_y)
         if len(food.asList()) <= 2:
             dist = agent.getMazeDistance(agent.start_pos, (next_x, next_y))
             features["run-home"] = float(dist) / (walls.width * walls.height)
 
-        # count the number of ghosts 1-step away
-        features["#-of-ghosts-3-step-away"] = get_ghosts_3_away(agent, state, (next_x, next_y), ghosts)
+        features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(state.getAgentPosition(g), walls) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer == 0)
 
+        ghost_distances = [agent.getMazeDistance(pos, g) for g in ghosts]
+
+        closest_ghost = max(min(ghost_distances), 0.5)
+        features["dist-to-closest-ghost"] = float(closest_ghost) / (walls.width * walls.height)
+
+        capsules = [agent.getMazeDistance(pos, c) for c in agent.getCapsules(state)]
+        if len(capsules) > 0:
+            features["dist-to-closest-capsule"] = float(min(capsules)) / (walls.width * walls.height)
+
+        scared_ghost_distances = [agent.getMazeDistance(pos, state.getAgentPosition(g)) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer > 0 and not state.getAgentState(g).isPacman]
+        if len(scared_ghost_distances) > 0:
+            features["dist-to-closest-scared-ghost"] = float(min(scared_ghost_distances)) / (walls.width * walls.height)
         # if there is no danger of ghosts then add the food feature
-        if not features["#-of-ghosts-3-step-away"] and food[next_x][next_y]:
+        if not features["#-of-ghosts-1-step-away"] and food[next_x][next_y]:
             features["eats-food"] = 1.0
 
-        dist = closestFood((next_x, next_y), food, walls)
+        dist = max(closestFood((next_x, next_y), food, walls), 0.5)
         if dist is not None:
             # make the distance a number less than one otherwise the update
             # will diverge wildly

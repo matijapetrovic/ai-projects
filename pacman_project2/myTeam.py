@@ -197,7 +197,6 @@ class PacmanQAgent(QLearningAgent):
         args['gamma'] = gamma
         args['alpha'] = alpha
         args['numTraining'] = numTraining
-        self.index = 0  # This is always Pacman
         QLearningAgent.__init__(self, index, **args)
 
     def getAction(self, state):
@@ -270,9 +269,12 @@ class DummyAgent(ApproximateQAgent):
       ApproximateQAgent.__init__(self, index, extractor, **args)
       self.weights["bias"] = 1.0
       self.weights["closest-food"] = -0.5
-      self.weights["#-of-ghosts-3-step-away"] = -10.0
       self.weights["eats-food"] = 1.0
       self.weights["run-home"] = -15.0
+      self.weights["#-of-ghosts-1-step-away"] = -10.0
+      self.weights["dist-to-closest-ghost"] = 0.5
+      self.weights["dist-to-closest-capsule"] = -1.0
+      self.weights["dist-to-closest-scared-ghost"] = -2.0
 
   def registerInitialState(self, gameState):
     """

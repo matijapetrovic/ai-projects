@@ -209,9 +209,29 @@ class ReinforcementAgent(ValueEstimationAgent):
             The simulation should somehow ensure this is called
         """
         if not self.lastState is None:
-            reward = state.getScore() - self.lastState.getScore()
+            reward = self.calculateReward(state)
+#            reward = state.getScore() - self.lastState.getScore()
             self.observeTransition(self.lastState, self.lastAction, state, reward)
         return state
+
+    def calculateReward(self, state):
+        reward = 0
+        reward += self.foodReward(state)
+        reward += self.deathPenalty(state)
+        return reward
+
+    def foodReward(self, state):
+        x, y = state.getAgentPosition(self.index)
+        if self.getFood(self.lastState)[x][y]:
+            return 10
+        return 0
+
+    def deathPenalty(self, state):
+        pos = state.getAgentPosition(self.index)
+        last_pos = self.lastState.getAgentPosition(self.index)
+        if self.getMazeDistance(pos, last_pos) > 1:
+            return -50
+        return 0
 
     def registerInitialState(self, state):
         self.startEpisode()
