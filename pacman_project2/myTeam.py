@@ -14,15 +14,17 @@
 
 from captureAgents import CaptureAgent
 import random, time, util
-from game import Directions
+from game import Directions, Actions
 import game
 
 #################
 # Team creation #
 #################
+from learningAgents import ValueEstimationAgent
+
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'DummyAgent', second = 'DummyAgent', **args):
+               first = 'DummyAgent', second = 'DefensiveAgent', **args):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -308,3 +310,124 @@ class DummyAgent(ApproximateQAgent):
     Picks among actions randomly.
     """
     return PacmanQAgent.getAction(self, gameState)
+
+
+class DefensiveAgent(CaptureAgent):
+    def __init__(self, index):
+        CaptureAgent.__init__(self, index)
+
+    def getValue(self, state, opponent):
+        my_pos = state.getAgentPosition(self.index)
+        opponent_pos = state.getAgentPosition(opponent)
+        return self.getMazeDistance(my_pos, opponent_pos)
+
+
+    def minimax(self, state, opponent, next_player=-1, depth=5):
+        for action in state.getLegalActions(self.index):
+            x, y = state.getAgentPosition(self.index)
+            dx, dy = Actions.directionToVector(action)
+            pos = int(x + dx), int(y + dy)
+
+            opp_pos = state.getAgentPosition(opponent)
+            if self.getMazeDistance(opp_pos, pos) == 0:
+                return 0, action
+        if depth == 0:
+            val = self.getValue(state, opponent)
+            print(val)
+            return val, None
+
+        next_player = self.generate_next_player(next_player, opponent)
+        if self.index != next_player:
+            return self.max_value(state, depth, opponent, next_player)
+        else:
+            return self.min_value(state, depth, opponent, next_player)
+
+
+    def min_value(self, state, depth, opponent, next_player):
+        v = math.inf
+        legalActions = state.getLegalActions(next_player)
+        retAction = None
+        for action in legalActions:
+            newState = state.generateSuccessor(next_player, action)
+            eval, _ = self.minimax(newState, opponent, next_player, depth - 1)
+            if eval < v:
+                v = eval
+                retAction = action
+        return v, retAction
+
+
+    def max_value(self, state, depth, opponent, next_player):
+        v = -math.inf
+        retAction = None
+        legalActions = state.getLegalActions(next_player)
+        for action in legalActions:
+            newState = state.generateSuccessor(next_player, action)
+            eval, _ = self.minimax(newState, opponent, next_player, depth - 1)
+            if eval > v:
+                v = eval
+                retAction = action
+        return v, retAction
+
+
+    def generate_next_player(self, current_next_player, opponent):
+        if current_next_player == opponent or current_next_player == -1:
+            return self.index
+        return opponent
+
+
+    def calculate_closest_opponent_distance(self, ghosts, state, pos):
+        min_distance = 10000
+        opponent_index = -1
+        for g in ghosts:
+            ghost_pos = state.getAgentPosition(g)
+            ghost_state = state.getAgentState(g)
+            dist = self.getMazeDistance(pos, ghost_pos)
+            if dist <= min_distance and ghost_state.isPacman:
+                min_distance = dist
+                opponent_index = g
+        return min_distance, opponent_index
+
+
+
+    def get_closest_opponent_distance(self, state, action):
+        ghosts = self.getOpponents(state)
+        x, y = state.getAgentPosition(self.index)
+        dx, dy = Actions.directionToVector(action)
+        next_x, next_y = int(x + dx), int(y + dy)
+
+        return self.calculate_closest_opponent_distance(ghosts, state, (next_x, next_y))
+
+
+    def minimax_allowed(self, state, legalActions, distance=5):
+        for action in legalActions:
+            min_opponent_distance, opponent_index = self.get_closest_opponent_distance(state, action)
+            if min_opponent_distance <= distance:
+                return True, opponent_index
+        return False, None
+
+    def getAction(self, state):
+        legalActions = state.getLegalActions(self.index)
+        bestAction = None
+
+        # samo ako je najblizi protivnik pacman i na odredjenoj je udaljenosti uradi minimax
+        if len(legalActions) > 0:
+            doMinimax, opponent_index = self.minimax_allowed(state, legalActions)
+            if doMinimax:
+                minimax_value, bestAction = self.minimax(state, opponent_index)
+            else:
+                walls = state.getWalls()
+                middle = (walls.width / 2, walls.height / 2)
+                if self.red:
+                    middle = (middle[0] - 1, middle[1] - 1)
+                min_dist = math.inf
+                for action in legalActions:
+                    x, y = state.getAgentPosition(self.index)
+                    dx, dy = Actions.directionToVector(action)
+                    pos = int(x + dx), int(y + dy)
+                    dist = self.getMazeDistance(middle, pos)
+                    if dist < min_dist:
+                        min_dist = dist
+                        bestAction = action
+        return bestAction
+
+
