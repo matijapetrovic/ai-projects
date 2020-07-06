@@ -276,11 +276,12 @@ class DummyAgent(ApproximateQAgent):
       self.weights["bias"] = 1.0
       self.weights["closest-food"] = -0.5
       self.weights["eats-food"] = 1.0
-      self.weights["run-home"] = -15.0
+      self.weights["run-home"] = -0.75
       self.weights["#-of-ghosts-1-step-away"] = -10.0
-      self.weights["dist-to-closest-ghost"] = 0.5
+      self.weights["dist-to-closest-ghost"] = 0.25
       self.weights["dist-to-closest-capsule"] = -1.0
       self.weights["dist-to-closest-scared-ghost"] = -2.0
+      self.weights["#-of-ghosts-3-step-away"] = -1.0
 
   def registerInitialState(self, gameState):
     """
@@ -313,8 +314,6 @@ class DummyAgent(ApproximateQAgent):
     """
     """
     action = PacmanQAgent.getAction(self, gameState)
-    if action == "Stop":
-        print(action)
     return action
 
 

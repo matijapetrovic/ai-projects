@@ -74,7 +74,7 @@ def get_ghosts_3_away(agent, state, pos, ghosts):
     for g in ghosts:
         ghost_pos = state.getAgentPosition(g)
         dist = agent.getMazeDistance(pos, ghost_pos)
-        if dist <= 5:
+        if dist <= 3:
             sum += 1
     return sum
 
@@ -88,6 +88,7 @@ def get_min_opponents_distance(agent, state, pos, ghosts):
             min_distance = dist
     return min_distance
 
+
 def check_opponents( state, ghosts):
     sum = 0
     for g in ghosts:
@@ -95,6 +96,7 @@ def check_opponents( state, ghosts):
         if ghost_state.isPacman:
             sum += 1
     return sum
+
 
 def get_pacmans_1_step_away(agent, state, pos, ghosts):
     sum = 0
@@ -105,6 +107,10 @@ def get_pacmans_1_step_away(agent, state, pos, ghosts):
         if dist <= 5 and ghost_state.isPacman:
             sum += 1
     return sum
+
+
+def can_eat(agent, ghosts, state, food_pos):
+    return get_ghosts_3_away(agent, state, food_pos, ghosts) < 1
 
 
 class SimpleExtractor(FeatureExtractor):
@@ -150,9 +156,13 @@ class SimpleExtractor(FeatureExtractor):
         scared_ghost_distances = [agent.getMazeDistance(pos, state.getAgentPosition(g)) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer > 0 and not state.getAgentState(g).isPacman]
         if len(scared_ghost_distances) > 0:
             features["dist-to-closest-scared-ghost"] = float(min(scared_ghost_distances)) / (walls.width * walls.height)
+
         # if there is no danger of ghosts then add the food feature
-        if not features["#-of-ghosts-1-step-away"] and food[next_x][next_y]:
+        features["#-of-ghosts-3-step-away"]= get_ghosts_3_away(agent, state, pos, [g for g in agent.getOpponents(state)])
+
+        if not features["#-of-ghosts-1-step-away"] and not features["#-of-ghosts-3-step-away"] and food[next_x][next_y]:
             features["eats-food"] = 1.0
+
         dist = closestFood((next_x, next_y), food, walls)
         if dist is not None:
             features["closest-food"] = float(dist) / (walls.width * walls.height)
