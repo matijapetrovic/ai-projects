@@ -1,0 +1,144 @@
+C:\Dev\faks\ori\venv37\Scripts\python.exe C:/Dev/faks/ori/projekti/chest_xray_classification/script.py
+2020-07-06 19:36:41.206380: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cudart64_101.dll'; dlerror: cudart64_101.dll not found
+2020-07-06 19:36:41.206529: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+READING  Normal
+READING  Virus
+READING  bacteria
+READING  Normal
+READING  Virus
+READING  bacteria
+2020-07-06 19:37:20.287979: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library nvcuda.dll
+2020-07-06 19:37:21.225528: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1561] Found device 0 with properties:
+pciBusID: 0000:02:00.0 name: GeForce MX250 computeCapability: 6.1
+coreClock: 1.582GHz coreCount: 3 deviceMemorySize: 4.00GiB deviceMemoryBandwidth: 52.21GiB/s
+2020-07-06 19:37:21.226475: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cudart64_101.dll'; dlerror: cudart64_101.dll not found
+2020-07-06 19:37:21.227256: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cublas64_10.dll'; dlerror: cublas64_10.dll not found
+2020-07-06 19:37:21.228008: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cufft64_10.dll'; dlerror: cufft64_10.dll not found
+2020-07-06 19:37:21.228718: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'curand64_10.dll'; dlerror: curand64_10.dll not found
+2020-07-06 19:37:21.229476: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cusolver64_10.dll'; dlerror: cusolver64_10.dll not found
+2020-07-06 19:37:21.230243: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cusparse64_10.dll'; dlerror: cusparse64_10.dll not found
+2020-07-06 19:37:21.230998: W tensorflow/stream_executor/platform/default/dso_loader.cc:55] Could not load dynamic library 'cudnn64_7.dll'; dlerror: cudnn64_7.dll not found
+2020-07-06 19:37:21.231138: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1598] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2020-07-06 19:37:21.231617: I tensorflow/core/platform/cpu_feature_guard.cc:143] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2
+2020-07-06 19:37:21.238582: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x21ccc36d890 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-07-06 19:37:21.238746: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-07-06 19:37:21.238948: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1102] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-07-06 19:37:21.239120: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1108]
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #
+=================================================================
+conv2d (Conv2D)              (None, 70, 70, 16)        160
+_________________________________________________________________
+batch_normalization (BatchNo (None, 70, 70, 16)        64
+_________________________________________________________________
+max_pooling2d (MaxPooling2D) (None, 35, 35, 16)        0
+_________________________________________________________________
+conv2d_1 (Conv2D)            (None, 35, 35, 32)        4640
+_________________________________________________________________
+dropout (Dropout)            (None, 35, 35, 32)        0
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 35, 35, 32)        128
+_________________________________________________________________
+max_pooling2d_1 (MaxPooling2 (None, 18, 18, 32)        0
+_________________________________________________________________
+conv2d_2 (Conv2D)            (None, 18, 18, 32)        9248
+_________________________________________________________________
+batch_normalization_2 (Batch (None, 18, 18, 32)        128
+_________________________________________________________________
+max_pooling2d_2 (MaxPooling2 (None, 9, 9, 32)          0
+_________________________________________________________________
+conv2d_3 (Conv2D)            (None, 9, 9, 64)          18496
+_________________________________________________________________
+dropout_1 (Dropout)          (None, 9, 9, 64)          0
+_________________________________________________________________
+batch_normalization_3 (Batch (None, 9, 9, 64)          256
+_________________________________________________________________
+max_pooling2d_3 (MaxPooling2 (None, 5, 5, 64)          0
+_________________________________________________________________
+conv2d_4 (Conv2D)            (None, 5, 5, 128)         73856
+_________________________________________________________________
+dropout_2 (Dropout)          (None, 5, 5, 128)         0
+_________________________________________________________________
+batch_normalization_4 (Batch (None, 5, 5, 128)         512
+_________________________________________________________________
+max_pooling2d_4 (MaxPooling2 (None, 3, 3, 128)         0
+_________________________________________________________________
+flatten (Flatten)            (None, 1152)              0
+_________________________________________________________________
+dense (Dense)                (None, 128)               147584
+_________________________________________________________________
+dropout_3 (Dropout)          (None, 128)               0
+_________________________________________________________________
+dense_1 (Dense)              (None, 3)                 387
+=================================================================
+Total params: 255,459
+Trainable params: 254,915
+Non-trainable params: 544
+_________________________________________________________________
+Epoch 1/25
+133/133 [==============================] - 33s 251ms/step - loss: 0.9014 - accuracy: 0.6044 - val_loss: 2.6349 - val_accuracy: 0.4713 - lr: 0.0010
+Epoch 2/25
+133/133 [==============================] - 32s 240ms/step - loss: 0.7205 - accuracy: 0.6783 - val_loss: 2.4877 - val_accuracy: 0.4873 - lr: 0.0010
+Epoch 3/25
+133/133 [==============================] - 33s 247ms/step - loss: 0.6725 - accuracy: 0.6996 - val_loss: 2.0217 - val_accuracy: 0.3497 - lr: 0.0010
+Epoch 4/25
+133/133 [==============================] - ETA: 0s - loss: 0.6423 - accuracy: 0.7256
+Epoch 00004: ReduceLROnPlateau reducing learning rate to 0.0003000000142492354.
+133/133 [==============================] - 34s 254ms/step - loss: 0.6423 - accuracy: 0.7256 - val_loss: 1.7298 - val_accuracy: 0.4731 - lr: 0.0010
+Epoch 5/25
+133/133 [==============================] - 34s 256ms/step - loss: 0.5939 - accuracy: 0.7400 - val_loss: 0.5839 - val_accuracy: 0.7305 - lr: 3.0000e-04
+Epoch 6/25
+133/133 [==============================] - 35s 260ms/step - loss: 0.5731 - accuracy: 0.7466 - val_loss: 0.5395 - val_accuracy: 0.7670 - lr: 3.0000e-04
+Epoch 7/25
+133/133 [==============================] - 35s 260ms/step - loss: 0.5756 - accuracy: 0.7509 - val_loss: 0.5023 - val_accuracy: 0.7838 - lr: 3.0000e-04
+Epoch 8/25
+133/133 [==============================] - 36s 272ms/step - loss: 0.5683 - accuracy: 0.7492 - val_loss: 0.5535 - val_accuracy: 0.7641 - lr: 3.0000e-04
+Epoch 9/25
+133/133 [==============================] - ETA: 0s - loss: 0.5630 - accuracy: 0.7530
+Epoch 00009: ReduceLROnPlateau reducing learning rate to 9.000000427477062e-05.
+133/133 [==============================] - 35s 263ms/step - loss: 0.5630 - accuracy: 0.7530 - val_loss: 1.0080 - val_accuracy: 0.5921 - lr: 3.0000e-04
+Epoch 10/25
+133/133 [==============================] - 32s 244ms/step - loss: 0.5421 - accuracy: 0.7672 - val_loss: 0.4775 - val_accuracy: 0.7942 - lr: 9.0000e-05
+Epoch 11/25
+133/133 [==============================] - 32s 238ms/step - loss: 0.5353 - accuracy: 0.7734 - val_loss: 0.5950 - val_accuracy: 0.7445 - lr: 9.0000e-05
+Epoch 12/25
+133/133 [==============================] - ETA: 0s - loss: 0.5403 - accuracy: 0.7651
+Epoch 00012: ReduceLROnPlateau reducing learning rate to 2.700000040931627e-05.
+133/133 [==============================] - 32s 238ms/step - loss: 0.5403 - accuracy: 0.7651 - val_loss: 0.4931 - val_accuracy: 0.7866 - lr: 9.0000e-05
+Epoch 13/25
+133/133 [==============================] - 31s 232ms/step - loss: 0.5252 - accuracy: 0.7719 - val_loss: 0.4866 - val_accuracy: 0.7890 - lr: 2.7000e-05
+Epoch 14/25
+133/133 [==============================] - ETA: 0s - loss: 0.5221 - accuracy: 0.7741
+Epoch 00014: ReduceLROnPlateau reducing learning rate to 8.100000013655517e-06.
+133/133 [==============================] - 32s 244ms/step - loss: 0.5221 - accuracy: 0.7741 - val_loss: 0.5040 - val_accuracy: 0.7805 - lr: 2.7000e-05
+Epoch 15/25
+133/133 [==============================] - 30s 229ms/step - loss: 0.5230 - accuracy: 0.7753 - val_loss: 0.4889 - val_accuracy: 0.7866 - lr: 8.1000e-06
+Epoch 16/25
+133/133 [==============================] - ETA: 0s - loss: 0.5222 - accuracy: 0.7736
+Epoch 00016: ReduceLROnPlateau reducing learning rate to 2.429999949526973e-06.
+133/133 [==============================] - 30s 227ms/step - loss: 0.5222 - accuracy: 0.7736 - val_loss: 0.5002 - val_accuracy: 0.7812 - lr: 8.1000e-06
+Epoch 17/25
+133/133 [==============================] - 30s 225ms/step - loss: 0.5252 - accuracy: 0.7703 - val_loss: 0.4995 - val_accuracy: 0.7819 - lr: 2.4300e-06
+Epoch 18/25
+133/133 [==============================] - ETA: 0s - loss: 0.5296 - accuracy: 0.7710
+Epoch 00018: ReduceLROnPlateau reducing learning rate to 1e-06.
+133/133 [==============================] - 30s 226ms/step - loss: 0.5296 - accuracy: 0.7710 - val_loss: 0.4952 - val_accuracy: 0.7833 - lr: 2.4300e-06
+Epoch 19/25
+133/133 [==============================] - 30s 229ms/step - loss: 0.5240 - accuracy: 0.7750 - val_loss: 0.4957 - val_accuracy: 0.7831 - lr: 1.0000e-06
+Epoch 20/25
+133/133 [==============================] - 31s 231ms/step - loss: 0.5226 - accuracy: 0.7710 - val_loss: 0.4954 - val_accuracy: 0.7831 - lr: 1.0000e-06
+Epoch 21/25
+133/133 [==============================] - 31s 234ms/step - loss: 0.5141 - accuracy: 0.7719 - val_loss: 0.4930 - val_accuracy: 0.7842 - lr: 1.0000e-06
+Epoch 22/25
+133/133 [==============================] - 31s 236ms/step - loss: 0.5253 - accuracy: 0.7703 - val_loss: 0.4950 - val_accuracy: 0.7833 - lr: 1.0000e-06
+Epoch 23/25
+133/133 [==============================] - 32s 239ms/step - loss: 0.5212 - accuracy: 0.7693 - val_loss: 0.4930 - val_accuracy: 0.7840 - lr: 1.0000e-06
+Epoch 24/25
+133/133 [==============================] - 32s 237ms/step - loss: 0.5316 - accuracy: 0.7705 - val_loss: 0.4931 - val_accuracy: 0.7842 - lr: 1.0000e-06
+Epoch 25/25
+133/133 [==============================] - 31s 230ms/step - loss: 0.5214 - accuracy: 0.7729 - val_loss: 0.4920 - val_accuracy: 0.7847 - lr: 1.0000e-06
+624/624 [==============================] - 1s 2ms/step - loss: 0.4667 - accuracy: 0.8429
+Loss of the model is -  0.4666614532470703
+Accuracy of the model is -  84.29487347602844 %
