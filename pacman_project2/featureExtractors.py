@@ -68,8 +68,33 @@ def closestFood(pos, food, walls):
     # no food found
     return None
 
+def closestFoodExperimental(pos, food, walls, agent, state):
+    """
+    closestFood -- this is similar to the function that we have
+    worked on in the search project; here its all in one place
+    """
+    fringe = [(pos[0], pos[1], 0)]
+    expanded = set()
+    last_dist = 1000
+    while fringe:
+        pos_x, pos_y, dist = fringe.pop(0)
+        if (pos_x, pos_y) in expanded:
+            continue
+        expanded.add((pos_x, pos_y))
+        # if we find a food at this location then exit
+        num_opp = get_ghosts_5_away(agent, state, pos, agent.getOpponents(state))
+        if food[pos_x][pos_y] and num_opp == 0 and dist != last_dist:
+            return dist
+        else:
+            last_dist = dist
+        # otherwise spread out from the location to its neighbours
+        nbrs = Actions.getLegalNeighbors((pos_x, pos_y), walls)
+        for nbr_x, nbr_y in nbrs:
+            fringe.append((nbr_x, nbr_y, dist+1))
+    # no food found
+    return None
 
-def get_ghosts_3_away(agent, state, pos, ghosts):
+def get_ghosts_5_away(agent, state, pos, ghosts):
     sum = 0
     for g in ghosts:
         ghost_pos = state.getAgentPosition(g)
@@ -84,7 +109,18 @@ def get_min_opponents_distance(agent, state, pos, ghosts):
         ghost_pos = state.getAgentPosition(g)
         ghost_state = state.getAgentState(g)
         dist = agent.getMazeDistance(pos, ghost_pos)
-        if dist <= min_distance:  # zasto ne radi ako ovde stavim isPacman ?
+        if dist <= min_distance:
+            min_distance = dist
+    return min_distance
+
+
+def get_min_opponent_pacman_distance(agent, state, pos, ghosts):
+    min_distance = 10000
+    for g in ghosts:
+        ghost_pos = state.getAgentPosition(g)
+        ghost_state = state.getAgentState(g)
+        dist = agent.getMazeDistance(pos, ghost_pos)
+        if dist <= min_distance and ghost_state.isPacman:
             min_distance = dist
     return min_distance
 
@@ -138,7 +174,7 @@ class SimpleExtractor(FeatureExtractor):
         next_x, next_y = int(x + dx), int(y + dy)
         pos = (next_x, next_y)
         num_carrying = state.getAgentState(agent.index).numCarrying
-        if num_carrying > 0:
+        if num_carrying > 0: # and get_ghosts_5_away(agent, state, pos, agent.getOpponents(state)) > 0 add maybe ?
             dist = agent.getMazeDistance(agent.start_pos, (next_x, next_y))
             features["run-home"] = float(dist) / (walls.width * walls.height) * num_carrying
 
@@ -164,6 +200,65 @@ class SimpleExtractor(FeatureExtractor):
             features["eats-food"] = 1.0
 
         dist = closestFood((next_x, next_y), food, walls)
+        if dist is not None:
+            features["closest-food"] = float(dist) / (walls.width * walls.height)
+        features.divideAll(10.0)
+        return features
+
+
+class ExperimentalExtractor(FeatureExtractor):
+    """
+    Returns simple features for a basic reflex Pacman:
+    - whether food will be eaten
+    - how far away the next food is
+    - whether a ghost collision is imminent
+    - whether a ghost is one step away
+    """
+
+    def getFeatures(self, agent, state, action):
+        # extract the grid of food and wall locations and get the ghost locations
+        food = agent.getFood(state)
+        walls = state.getWalls()
+        ghosts = [state.getAgentPosition(g) for g in agent.getOpponents(state)]
+
+        features = util.Counter()
+        features["bias"] = 1.0
+
+
+        # compute the location of pacman after he takes the action
+        x, y = state.getAgentPosition(agent.index)
+        dx, dy = Actions.directionToVector(action)
+        next_x, next_y = int(x + dx), int(y + dy)
+        pos = (next_x, next_y)
+        num_carrying = state.getAgentState(agent.index).numCarrying
+        if num_carrying > 0: # and get_ghosts_5_away(agent, state, pos, agent.getOpponents(state)) > 0 add maybe ?
+            dist = agent.getMazeDistance(agent.start_pos, (next_x, next_y))
+            features["run-home"] = float(dist) / (walls.width * walls.height) * num_carrying ** 3
+
+        features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(state.getAgentPosition(g), walls) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer == 0)
+
+        ghost_distances = [agent.getMazeDistance(pos, g) for g in ghosts]
+
+        closest_ghost = max(min(ghost_distances), 0.5)
+        features["dist-to-closest-ghost"] = float(closest_ghost) / (walls.width * walls.height)
+
+        capsules = [agent.getMazeDistance(pos, c) for c in agent.getCapsules(state)]
+        if len(capsules) > 0:
+            features["dist-to-closest-capsule"] = float(min(capsules)) / (walls.width * walls.height)
+
+        scared_ghost_distances = [agent.getMazeDistance(pos, state.getAgentPosition(g)) for g in agent.getOpponents(state) if state.getAgentState(g).scaredTimer > 0 and not state.getAgentState(g).isPacman]
+        if len(scared_ghost_distances) > 0:
+            features["dist-to-closest-scared-ghost"] = float(min(scared_ghost_distances)) / (walls.width * walls.height)
+        # if there is no danger of ghosts then add the food feature
+        if not features["#-of-ghosts-1-step-away"] and food[next_x][next_y]:
+            features["eats-food"] = 1.0
+
+        dist = closestFood((next_x, next_y), food, walls)
+        num_ghosts = get_ghosts_5_away(agent, state, pos, agent.getOpponents(state))
+        print(dist)
+        if num_ghosts > 0:
+            dist = closestFoodExperimental((next_x, next_y), food, walls, agent, state)
+        print(dist)
         if dist is not None:
             features["closest-food"] = float(dist) / (walls.width * walls.height)
         features.divideAll(10.0)
