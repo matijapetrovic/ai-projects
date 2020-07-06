@@ -218,19 +218,34 @@ class ReinforcementAgent(ValueEstimationAgent):
         reward = 0
         reward += self.foodReward(state)
         reward += self.deathPenalty(state)
+        reward += self.capsuleReward(state)
+        reward += self.bringHomeReward(state)
         return reward
 
     def foodReward(self, state):
         x, y = state.getAgentPosition(self.index)
         if self.getFood(self.lastState)[x][y]:
-            return 10
+            return 5
+        return 0
+
+    def capsuleReward(self, state):
+        pos = state.getAgentPosition(self.index)
+        if pos in self.getCapsules(self.lastState):
+            return 20
         return 0
 
     def deathPenalty(self, state):
         pos = state.getAgentPosition(self.index)
         last_pos = self.lastState.getAgentPosition(self.index)
         if self.getMazeDistance(pos, last_pos) > 1:
-            return -5
+            return -50
+        return 0
+
+    def bringHomeReward(self, state):
+        num_carrying = state.getAgentState(self.index).numCarrying
+        last_num_carrying = self.lastState.getAgentState(self.index).numCarrying
+        if last_num_carrying > num_carrying:
+            return last_num_carrying - num_carrying
         return 0
 
     def registerInitialState(self, state):

@@ -274,8 +274,8 @@ class DummyAgent(ApproximateQAgent):
       self.weights["bias"] = 1.0
       self.weights["closest-food"] = -0.5
       self.weights["eats-food"] = 1.0
-      self.weights["run-home"] = -0.75
-      self.weights["#-of-ghosts-1-step-away"] = -10.0
+      self.weights["run-home"] = -0.2
+      self.weights["#-of-ghosts-1-step-away"] = -1.0
       self.weights["dist-to-closest-ghost"] = 0.25
       self.weights["dist-to-closest-capsule"] = -1.0
       self.weights["dist-to-closest-scared-ghost"] = -2.0
@@ -319,6 +319,7 @@ class DefensiveAgent(CaptureAgent):
     def __init__(self, index, **args):
         CaptureAgent.__init__(self, index)
         self.state = None
+        self.eaten_food_pos = None
 
     def getValue(self, state, opponent):
         my_pos = state.getAgentPosition(self.index)
@@ -400,17 +401,12 @@ class DefensiveAgent(CaptureAgent):
 
         return self.calculate_closest_opponent_distance(ghosts, state, (next_x, next_y))
 
-
     def minimax_allowed(self, state, legalActions, distance=5):
         for action in legalActions:
             min_opponent_distance, opponent_index = self.get_closest_opponent_distance(state, action)
             if min_opponent_distance <= distance:
                 return True, opponent_index
         return False, None
-
-    def _get_num_of_not_eaten_food(self):
-        return self.num_of_not_eaten_food
-
 
     def get_closest_opponent_position(self, state, pos, ghosts):
         min_distance = 10000
@@ -432,18 +428,16 @@ class DefensiveAgent(CaptureAgent):
 
         self.state = state if self.state is None else self.state
         prev_food = self.getFoodYouAreDefending(self.state)
-        num_of_not_eaten_food = sum(row.count(True) for row in now_food.data)
-        num_of_previous_not_eaten_food = sum(row.count(True) for row in prev_food.data)
 
-        eaten_food_pos = None
-        for x in range(now_food.height - 1):
-            for y in range(int(now_food.width/2) - 1):
+        for x in range(now_food.width):
+            for y in range(now_food.height):
                 if not now_food[x][y] and prev_food[x][y]:
-                    eaten_food_pos = (x, y)
+                    self.eaten_food_pos = (x, y)
 
         if len(legalActions) > 0:
             doMinimax, opponent_index = self.minimax_allowed(state, legalActions)
             if doMinimax:
+                self.eaten_food_pos = None
                 minimax_value, bestAction = self.minimax(state, opponent_index)
             else:
                 walls = state.getWalls()
@@ -451,14 +445,18 @@ class DefensiveAgent(CaptureAgent):
                 if self.red:
                     middle = (middle[0] - 1, middle[1] - 1)
                 min_dist = math.inf
+                min_eaten_dist = math.inf
                 for action in legalActions:
                     x, y = state.getAgentPosition(self.index)
                     dx, dy = Actions.directionToVector(action)
                     pos = int(x + dx), int(y + dy)
                     dist = self.getMazeDistance(middle, pos)
-                    if num_of_not_eaten_food != num_of_previous_not_eaten_food and eaten_food_pos is not None:
-                        dist = self.getMazeDistance(eaten_food_pos, pos)
-                    if dist < min_dist:
+                    if self.eaten_food_pos is not None:
+                        eaten_dist = self.getMazeDistance(self.eaten_food_pos, pos)
+                        if eaten_dist < min_eaten_dist:
+                            min_eaten_dist = eaten_dist
+                            bestAction = action
+                    elif dist < min_dist:
                         min_dist = dist
                         bestAction = action
                 self.state = state

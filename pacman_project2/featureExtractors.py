@@ -99,7 +99,7 @@ def get_ghosts_5_away(agent, state, pos, ghosts):
     for g in ghosts:
         ghost_pos = state.getAgentPosition(g)
         dist = agent.getMazeDistance(pos, ghost_pos)
-        if dist <= 3:
+        if dist <= 5:
             sum += 1
     return sum
 
@@ -144,6 +144,15 @@ def get_pacmans_1_step_away(agent, state, pos, ghosts):
             sum += 1
     return sum
 
+
+def get_ghosts_3_away(agent, state, pos, ghosts):
+    sum = 0
+    for g in ghosts:
+        ghost_pos = state.getAgentPosition(g)
+        dist = agent.getMazeDistance(pos, ghost_pos)
+        if dist <= 3:
+            sum += 1
+    return sum
 
 def can_eat(agent, ghosts, state, food_pos):
     return get_ghosts_3_away(agent, state, food_pos, ghosts) < 1
