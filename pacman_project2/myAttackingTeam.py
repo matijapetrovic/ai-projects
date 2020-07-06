@@ -24,7 +24,7 @@ from learningAgents import ValueEstimationAgent
 
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'DummyAgent', second = 'DefensiveAgent', **args):
+               first = 'DummyAgent', second = 'DummyAgent', **args):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -235,6 +235,8 @@ class ApproximateQAgent(PacmanQAgent):
         """
         qValue = 0.0
         features = self.featExtractor.getFeatures(self, state, action)
+        if self.isInTesting():
+            print(features)
         for key in features.keys():
             qValue += (self.weights[key] * features[key])
         return qValue
@@ -269,12 +271,12 @@ class DummyAgent(ApproximateQAgent):
   create an agent as this is the bare minimum.
   """
 
-  def __init__(self, index, extractor="SimpleExtractor", **args):
+  def __init__(self, index, extractor="ExperimentalExtractor", **args):
       ApproximateQAgent.__init__(self, index, extractor, **args)
       self.weights["bias"] = 1.0
       self.weights["closest-food"] = -0.5
       self.weights["eats-food"] = 1.0
-      self.weights["run-home"] = -2.0
+      self.weights["run-home"] = -15.0
       self.weights["#-of-ghosts-1-step-away"] = -10.0
       self.weights["dist-to-closest-ghost"] = 0.5
       self.weights["dist-to-closest-capsule"] = -1.0
@@ -317,7 +319,6 @@ class DummyAgent(ApproximateQAgent):
 class DefensiveAgent(CaptureAgent):
     def __init__(self, index, **args):
         CaptureAgent.__init__(self, index)
-        self.state = None
 
     def getValue(self, state, opponent):
         my_pos = state.getAgentPosition(self.index)
@@ -407,39 +408,11 @@ class DefensiveAgent(CaptureAgent):
                 return True, opponent_index
         return False, None
 
-    def _get_num_of_not_eaten_food(self):
-        return self.num_of_not_eaten_food
-
-
-    def get_closest_opponent_position(self, state, pos, ghosts):
-        min_distance = 10000
-        position = None
-        for g in ghosts:
-            ghost_pos = state.getAgentPosition(g)
-            dist = self.getMazeDistance(ghost_pos)
-            if dist <= min_distance:
-                min_distance = dist
-                position = ghost_pos
-        return position
-
     def getAction(self, state):
         legalActions = state.getLegalActions(self.index)
         bestAction = None
 
-        # if closest opponent is pacman and he is at certain distance, do minimax
-        now_food = self.getFoodYouAreDefending(state)
-
-        self.state = state if self.state is None else self.state
-        prev_food = self.getFoodYouAreDefending(self.state)
-        num_of_not_eaten_food = sum(row.count(True) for row in now_food.data)
-        num_of_previous_not_eaten_food = sum(row.count(True) for row in prev_food.data)
-
-        eaten_food_pos = None
-        for x in range(now_food.height - 1):
-            for y in range(int(now_food.width/2) - 1):
-                if not now_food[x][y] and prev_food[x][y]:
-                    eaten_food_pos = (x, y)
-
+        # samo ako je najblizi protivnik pacman i na odredjenoj je udaljenosti uradi minimax
         if len(legalActions) > 0:
             doMinimax, opponent_index = self.minimax_allowed(state, legalActions)
             if doMinimax:
@@ -455,10 +428,9 @@ class DefensiveAgent(CaptureAgent):
                     dx, dy = Actions.directionToVector(action)
                     pos = int(x + dx), int(y + dy)
                     dist = self.getMazeDistance(middle, pos)
-                    if num_of_not_eaten_food != num_of_previous_not_eaten_food and eaten_food_pos is not None:
-                        dist = self.getMazeDistance(eaten_food_pos, pos)
                     if dist < min_dist:
                         min_dist = dist
                         bestAction = action
-                self.state = state
         return bestAction
+
+
