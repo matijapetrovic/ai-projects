@@ -14,7 +14,7 @@ from keras.callbacks import ReduceLROnPlateau
 from tensorflow.python.keras.applications.vgg16 import VGG16
 
 BATCH_SIZE = 32
-IMAGE_SIZE = (70, 70)
+IMAGE_SIZE = (224, 224)
 EPOCHS = 25
 COLOR_MODE = "grayscale"
 CHANNELS = 1 if COLOR_MODE == "grayscale" else 3
@@ -183,14 +183,14 @@ SAVE = False
 
 def main():
     if TRAIN:
-        train_data, valid_data = load_test_data()
+        train_data, valid_data = load_train_data()
         model = build_model()
         history = train_model(model, train_data, valid_data)
         plot_history(history)
     else:
         model = load_model('model_mani.h5')
     if SAVE:
-        save_model(model, 'model_mani.h5')
+        save_model(model, 'model_mani2.h5')
     test_data = load_test_data()
     loss, accuracy = test_model(model, test_data)
     print("Loss of the model is - ", loss)
